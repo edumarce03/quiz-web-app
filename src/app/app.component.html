@@ -1,5 +1,15 @@
-<p
-  class="font-inter h-screen text-center text-lg flex items-center justify-center"
+<div
+  [class.dark]="isDarkMode"
+  class="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
 >
-  Hola este será nuestro proyecto: QuizWebApp
-</p>
+  <!-- Botón para cambiar el tema -->
+  <button
+    class="fixed top-4 right-4 p-2 bg-gray-200 dark:bg-gray-700 rounded-full"
+    (click)="toggleDarkMode()"
+  >
+    {{ isDarkMode ? "🌙" : "☀️" }}
+  </button>
+
+  <!-- Contenido de la aplicación -->
+  <router-outlet></router-outlet>
+</div>
