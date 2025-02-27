@@ -1,15 +1,27 @@
 <div
-  class="flex flex-col items-center justify-center h-screen bg-gray-100 dark:bg-gray-800 font-inter transition-all duration-300 ease-in-out"
+  class="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-blue-100 via-indigo-50 to-purple-100 dark:from-gray-900 dark:via-blue-950 dark:to-purple-950 font-inter transition-all duration-500 ease-in-out"
 >
   <div
-    class="bg-white dark:bg-gray-700 p-8 rounded-lg shadow-lg text-center max-w-md w-full transition-all duration-300 ease-in-out"
+    class="backdrop-blur-md bg-white/70 dark:bg-gray-800/40 p-8 rounded-xl shadow-lg text-left max-w-md w-full transition-all duration-300 ease-in-out border border-white/20 dark:border-indigo-900/30"
   >
+    <!-- Botón de regresar con estilo glasmórfico -->
+    <div class="flex justify-start mb-6">
+      <button
+        class="text-xs px-3 py-2 backdrop-blur-sm bg-gray-500/80 text-white rounded-full hover:bg-gray-600/90 dark:bg-gray-600/80 dark:hover:bg-gray-700/90 transition-all duration-300 ease-in-out border border-gray-400/30 dark:border-gray-500/30 shadow-sm hover:shadow w-20"
+        (click)="goBackToHome()"
+      >
+        <i class="fas fa-arrow-left mr-2"></i>
+        Salir
+      </button>
+    </div>
+
     <!-- Mostrar el nombre y el emoji del usuario -->
     <div class="mb-6">
       <h1
-        class="text-2xl font-bold text-gray-900 dark:text-white transition-all duration-300 ease-in-out"
+        class="text-2xl font-bold text-gray-900 dark:text-white transition-all duration-300 ease-in-out flex items-center"
       >
-        {{ userName }} {{ userEmoji }}
+        {{ userName }}
+        <span class="ml-2 text-xl">{{ userEmoji }}</span>
       </h1>
       <p
         class="text-gray-600 dark:text-gray-300 transition-all duration-300 ease-in-out"
@@ -18,7 +30,7 @@
       </p>
     </div>
 
-    <!-- Mostrar la pregunta actual -->
+    <!-- Mostrar la pregunta actual con estilo glasmórfico -->
     <div *ngIf="currentQuestionIndex < questions.length" class="mb-6">
       <h2
         class="text-xl font-semibold mb-4 text-gray-900 dark:text-white transition-all duration-300 ease-in-out"
@@ -27,44 +39,84 @@
       </h2>
       <div
         *ngFor="let option of questions[currentQuestionIndex].options"
-        class="mb-2"
+        class="mb-3"
       >
         <button
-          class="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors dark:bg-blue-600 dark:hover:bg-blue-700 transition-all duration-300 ease-in-out"
+          [ngClass]="{
+            'bg-green-500/90 dark:bg-green-600/80 border-green-400/50 dark:border-green-500/40':
+              selectedAnswer === option && isAnswerCorrect,
+            'bg-red-500/90 dark:bg-red-600/80 border-red-400/50 dark:border-red-500/40':
+              selectedAnswer === option && !isAnswerCorrect,
+            'bg-indigo-500/80 dark:bg-indigo-600/70 border-indigo-400/50 dark:border-indigo-500/40 hover:bg-indigo-600/90 dark:hover:bg-indigo-700/80':
+              selectedAnswer !== option
+          }"
+          class="w-full px-4 py-3 text-white rounded-lg transition-all duration-300 ease-in-out backdrop-blur-sm border shadow-sm hover:shadow text-left"
           (click)="selectAnswer(option)"
+          [disabled]="isAnswerSelected"
         >
           {{ option }}
         </button>
       </div>
     </div>
 
-    <!-- Mostrar el resultado final -->
-    <div *ngIf="currentQuestionIndex >= questions.length" class="mb-6">
-      <h2
-        class="text-2xl font-bold mb-4 text-gray-900 dark:text-white transition-all duration-300 ease-in-out"
-      >
-        ¡Quiz completado!
-      </h2>
-      <p
-        class="text-xl text-gray-900 dark:text-white transition-all duration-300 ease-in-out"
-      >
-        Tu puntaje: {{ score }} / {{ questions.length }}
-      </p>
+    <!-- Botón para avanzar a la siguiente pregunta -->
+    <div *ngIf="isAnswerSelected" class="flex justify-end mt-6">
       <button
-        class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors dark:bg-blue-600 dark:hover:bg-blue-700 transition-all duration-300 ease-in-out"
-        (click)="restartQuiz()"
+        class="text-xs px-3 py-3 backdrop-blur-sm bg-blue-500/80 dark:bg-blue-600/70 text-white rounded-full hover:bg-blue-600/90 dark:hover:bg-blue-700/80 transition-all duration-300 ease-in-out border border-blue-400/50 dark:border-blue-500/40 shadow-sm hover:shadow w-28"
+        (click)="nextQuestion()"
       >
-        Reiniciar Quiz
+        <span class="flex items-center justify-center">
+          Siguiente
+          <i class="fas fa-arrow-right ml-2"></i>
+        </span>
       </button>
     </div>
 
-    <!-- Mostrar el progreso -->
-    <div class="mt-6">
-      <p
-        class="text-gray-600 dark:text-gray-300 transition-all duration-300 ease-in-out"
+    <!-- Mostrar el resultado final -->
+    <div *ngIf="currentQuestionIndex >= questions.length" class="mb-6">
+      <div
+        class="backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 p-6 rounded-xl border border-white/30 dark:border-gray-700/30 shadow-lg mb-6"
       >
-        Pregunta {{ currentQuestionIndex + 1 }} de {{ questions.length }}
-      </p>
+        <h2
+          class="text-2xl font-bold mb-4 text-gray-900 dark:text-white transition-all duration-300 ease-in-out text-center"
+        >
+          ¡Quiz completado! 🎉
+        </h2>
+        <p
+          class="text-xl text-gray-900 dark:text-white transition-all duration-300 ease-in-out text-center"
+        >
+          Tu puntaje: {{ score }} / {{ questions.length }}
+        </p>
+      </div>
+      <button
+        class="w-full mt-4 px-4 py-3 backdrop-blur-sm bg-blue-500/80 dark:bg-blue-600/70 text-white rounded-lg hover:bg-blue-600/90 dark:hover:bg-blue-700/80 transition-all duration-300 ease-in-out border border-blue-400/50 dark:border-blue-500/40 shadow-sm hover:shadow"
+        (click)="restartQuiz()"
+      >
+        <span class="flex items-center justify-center">
+          <i class="fas fa-redo mr-2"></i>
+          Reiniciar Quiz
+        </span>
+      </button>
+    </div>
+
+    <!-- Mostrar el progreso (solo si el quiz no está completado) -->
+    <div *ngIf="currentQuestionIndex < questions.length" class="mt-6">
+      <div class="flex items-center justify-between">
+        <p
+          class="text-gray-600 dark:text-gray-300 transition-all duration-300 ease-in-out"
+        >
+          Pregunta {{ currentQuestionIndex + 1 }} de {{ questions.length }}
+        </p>
+        <!-- Barra de progreso -->
+        <div
+          class="w-1/2 bg-gray-300/50 dark:bg-gray-600/50 rounded-full h-2 backdrop-blur-sm"
+        >
+          <div
+            class="bg-indigo-500/80 dark:bg-cyan-400/80 h-2 rounded-full transition-all duration-500 ease-in-out"
+            [style.width.%]="(currentQuestionIndex / questions.length) * 100"
+          ></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
