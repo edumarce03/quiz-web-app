@@ -19,7 +19,7 @@ import { UserService } from '../../services/user.service';
 export class HomeComponent {
   userName: string = '';
   selectedEmoji: string = '';
-  emojis: string[] = ['😊', '🚀', '🎉', '🐱', '🌟', '👨‍💻'];
+  emojis: string[] = ['😊', '🦙', '🙈', '🐱', '🤓', '👨‍💻'];
   categories: any[] = [
     { name: 'Ciencia', icon: 'fas fa-flask' },
     { name: 'Historia', icon: 'fas fa-landmark' },

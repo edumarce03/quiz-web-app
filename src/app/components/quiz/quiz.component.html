@@ -2,9 +2,9 @@
   class="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-blue-100 via-indigo-50 to-purple-100 dark:from-gray-900 dark:via-blue-950 dark:to-purple-950 font-inter transition-all duration-500 ease-in-out"
 >
   <div
-    class="backdrop-blur-md bg-white/70 dark:bg-gray-800/40 p-8 rounded-xl shadow-lg text-left max-w-md w-full transition-all duration-300 ease-in-out border border-white/20 dark:border-indigo-900/30"
+    class="backdrop-blur-md bg-white/70 dark:bg-gray-800/40 p-4 md:p-6 rounded-xl shadow-lg text-left max-w-sm md:max-w-md w-full transition-all duration-300 ease-in-out border border-white/20 dark:border-indigo-900/30"
   >
-    <!-- Botón de regresar con estilo glasmórfico -->
+    <!-- Botón de regresar -->
     <div class="flex justify-start mb-6">
       <button
         class="text-xs px-3 py-2 backdrop-blur-sm bg-gray-500/80 text-white rounded-full hover:bg-gray-600/90 dark:bg-gray-600/80 dark:hover:bg-gray-700/90 transition-all duration-300 ease-in-out border border-gray-400/30 dark:border-gray-500/30 shadow-sm hover:shadow w-20"
@@ -30,7 +30,7 @@
       </p>
     </div>
 
-    <!-- Mostrar la pregunta actual con estilo glasmórfico -->
+    <!-- Mostrar la pregunta  -->
     <div *ngIf="currentQuestionIndex < questions.length" class="mb-6">
       <h2
         class="text-xl font-semibold mb-4 text-gray-900 dark:text-white transition-all duration-300 ease-in-out"
@@ -50,7 +50,7 @@
             'bg-indigo-500/80 dark:bg-indigo-600/70 border-indigo-400/50 dark:border-indigo-500/40 hover:bg-indigo-600/90 dark:hover:bg-indigo-700/80':
               selectedAnswer !== option
           }"
-          class="w-full px-4 py-3 text-white rounded-lg transition-all duration-300 ease-in-out backdrop-blur-sm border shadow-sm hover:shadow text-left"
+          class="w-full px-4 py-3 text-white rounded-lg transition-all duration-300 ease-in-out backdrop-blur-sm border shadow-sm hover:shadow text-left text-xs md:text-sm"
           (click)="selectAnswer(option)"
           [disabled]="isAnswerSelected"
         >
@@ -83,11 +83,22 @@
           ¡Quiz completado! 🎉
         </h2>
         <p
-          class="text-xl text-gray-900 dark:text-white transition-all duration-300 ease-in-out text-center"
+          class="text-base text-gray-900 dark:text-white transition-all duration-300 ease-in-out text-center mb-6"
         >
           Tu puntaje: {{ score }} / {{ questions.length }}
         </p>
+
+        <!-- Gráfico de resultados -->
+        <div class="mt-4">
+          <h3
+            class="text-lg font-semibold mb-3 text-gray-900 dark:text-white text-center"
+          >
+            Porcentaje de Resultados
+          </h3>
+          <div #resultChart></div>
+        </div>
       </div>
+
       <button
         class="w-full mt-4 px-4 py-3 backdrop-blur-sm bg-blue-500/80 dark:bg-blue-600/70 text-white rounded-lg hover:bg-blue-600/90 dark:hover:bg-blue-700/80 transition-all duration-300 ease-in-out border border-blue-400/50 dark:border-blue-500/40 shadow-sm hover:shadow"
         (click)="restartQuiz()"
@@ -103,7 +114,7 @@
     <div *ngIf="currentQuestionIndex < questions.length" class="mt-6">
       <div class="flex items-center justify-between">
         <p
-          class="text-gray-600 dark:text-gray-300 transition-all duration-300 ease-in-out"
+          class="text-gray-600 dark:text-gray-300 transition-all duration-300 ease-in-out text-xs md:text-sm"
         >
           Pregunta {{ currentQuestionIndex + 1 }} de {{ questions.length }}
         </p>

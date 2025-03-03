@@ -1,7 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import {
+  AfterViewChecked,
+  AfterViewInit,
+  Component,
+  ElementRef,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { UserService } from '../../services/user.service';
+import ApexCharts from 'apexcharts';
 
 @Component({
   selector: 'app-quiz',
@@ -10,7 +18,11 @@ import { UserService } from '../../services/user.service';
   templateUrl: './quiz.component.html',
   styles: ``,
 })
-export class QuizComponent {
+export class QuizComponent implements AfterViewChecked {
+  @ViewChild('resultChart') chartElement: ElementRef | undefined;
+  private chart: ApexCharts | undefined;
+  private chartInitialized: boolean = false;
+
   userName: string = ''; // Nombre del usuario
   userEmoji: string = ''; // Emoji seleccionado
   selectedCategory: string = ''; // Categoría seleccionada
@@ -23,6 +35,9 @@ export class QuizComponent {
   isAnswerCorrect: boolean | null = null; // Estado de la respuesta (correcta o incorrecta)
   isAnswerSelected: boolean = false; // Rastrea si el usuario ya seleccionó una respuesta
 
+  correctAnswers: number = 0; // Número de respuestas correctas
+  incorrectAnswers: number = 0; // Número de respuestas incorrectas
+
   constructor(private userService: UserService, private router: Router) {
     // Recuperar el nombre y el emoji del servicio
     const userData = this.userService.getUser();
@@ -33,6 +48,18 @@ export class QuizComponent {
     const navigation = this.router.getCurrentNavigation();
     this.selectedCategory = navigation?.extras.state?.['category'] || '';
     this.loadQuestions();
+  }
+
+  ngAfterViewChecked() {
+    if (
+      this.currentQuestionIndex >= this.questions.length &&
+      !this.chartInitialized
+    ) {
+      this.initializeChart();
+      this.chartInitialized = true; // Evitar múltiples inicializaciones
+    } else if (this.currentQuestionIndex < this.questions.length) {
+      this.chartInitialized = false; // Permitir reinicialización en el siguiente quiz
+    }
   }
 
   goBackToHome() {
@@ -219,24 +246,112 @@ export class QuizComponent {
   // Método para seleccionar una respuesta
   selectAnswer(answer: string) {
     if (!this.isAnswerSelected) {
-      // Solo permitir seleccionar una respuesta si no se ha seleccionado antes
       this.selectedAnswer = answer;
       this.isAnswerCorrect =
         answer === this.questions[this.currentQuestionIndex].answer;
-      this.isAnswerSelected = true; // Bloquear más selecciones
+      this.isAnswerSelected = true;
+
+      // Actualizar contadores para el gráfico
+      if (this.isAnswerCorrect) {
+        this.correctAnswers++;
+        this.score++;
+      } else {
+        this.incorrectAnswers++;
+      }
     }
   }
 
   // Método para avanzar a la siguiente pregunta
   nextQuestion() {
     if (this.isAnswerSelected) {
-      if (this.isAnswerCorrect) {
-        this.score++;
-      }
       this.currentQuestionIndex++;
       this.selectedAnswer = null;
       this.isAnswerCorrect = null;
-      this.isAnswerSelected = false; // Restablecer para la siguiente pregunta
+      this.isAnswerSelected = false;
+
+      // Si es el final del quiz, inicializar el gráfico
+      if (this.currentQuestionIndex >= this.questions.length) {
+        setTimeout(() => {
+          this.initializeChart();
+        }, 0); // Usar setTimeout para asegurar que el DOM esté listo
+      }
+    }
+  }
+
+  // Inicializar el gráfico de resultados
+  initializeChart() {
+    // Verificar que el contenedor del gráfico esté listo
+    if (this.chartElement && this.chartElement.nativeElement) {
+      // Colores para el gráfico: rojo y verde
+      const colors = ['#10B981', '#EF4444']; // Verde y rojo
+
+      // Configurar colores de texto
+      const textColorChart = '#ffffff'; // Texto en blanco para los porcentajes
+
+      const options = {
+        series: [this.correctAnswers, this.incorrectAnswers],
+        chart: {
+          type: 'donut',
+          height: 250,
+          fontFamily: 'Inter, sans-serif',
+          background: 'transparent',
+          foreColor: textColorChart, // Color base del texto
+          animations: {
+            enabled: true,
+            easing: 'easeinout',
+            speed: 800,
+          },
+        },
+        labels: ['Correctas', 'Incorrectas'],
+        colors: colors,
+        legend: {
+          show: false, // Ocultar las leyendas
+        },
+        dataLabels: {
+          enabled: true,
+          formatter: function (val: any, opts: any) {
+            const total = opts.w.globals.seriesTotals.reduce(
+              (a: number, b: number) => a + b,
+              0
+            );
+            const seriesValue = opts.w.globals.seriesTotals[opts.seriesIndex];
+            const percentage = ((seriesValue / total) * 100).toFixed(1);
+            return `${percentage}%`;
+          },
+          style: {
+            fontSize: '14px',
+            fontFamily: 'Inter, sans-serif',
+            fontWeight: 'bold',
+            colors: [textColorChart], // Texto en blanco para los porcentajes
+          },
+        },
+        tooltip: {
+          enabled: true,
+          y: {
+            formatter: function (val: number) {
+              return `${val} respuestas`;
+            },
+          },
+        },
+        plotOptions: {
+          pie: {
+            donut: {
+              labels: {
+                show: false, // Ocultar todas las etiquetas del centro (incluyendo el total)
+              },
+            },
+          },
+        },
+      };
+
+      // Destruir el gráfico anterior si existe
+      if (this.chart) {
+        this.chart.destroy();
+      }
+
+      // Crear y renderizar el nuevo gráfico
+      this.chart = new ApexCharts(this.chartElement.nativeElement, options);
+      this.chart.render();
     }
   }
 
@@ -245,5 +360,14 @@ export class QuizComponent {
     this.currentQuestionIndex = 0;
     this.score = 0;
     this.selectedAnswer = null;
+    this.correctAnswers = 0;
+    this.incorrectAnswers = 0;
+    this.isAnswerSelected = false;
+
+    // Destruir el gráfico si existe
+    if (this.chart) {
+      this.chart.destroy();
+      this.chart = undefined;
+    }
   }
 }
