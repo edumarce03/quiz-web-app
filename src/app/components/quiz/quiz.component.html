@@ -4,7 +4,7 @@
   <div
     class="backdrop-blur-md bg-white/70 dark:bg-gray-800/40 p-4 md:p-6 rounded-xl shadow-lg text-left max-w-sm md:max-w-md w-full transition-all duration-300 ease-in-out border border-white/20 dark:border-indigo-900/30"
   >
-    <!-- Botón de regresar -->
+    <!-- Botón de Salir -->
     <div class="flex justify-start mb-6">
       <button
         class="text-xs px-3 py-2 backdrop-blur-sm bg-gray-500/80 text-white rounded-full hover:bg-gray-600/90 dark:bg-gray-600/80 dark:hover:bg-gray-700/90 transition-all duration-300 ease-in-out border border-gray-400/30 dark:border-gray-500/30 shadow-sm hover:shadow w-20"
@@ -15,7 +15,7 @@
       </button>
     </div>
 
-    <!-- Mostrar el nombre y el emoji del usuario -->
+    <!-- Bienvenida -->
     <div class="mb-6">
       <h1
         class="text-2xl font-bold text-gray-900 dark:text-white transition-all duration-300 ease-in-out flex items-center"
@@ -30,16 +30,16 @@
       </p>
     </div>
 
-    <!-- Mostrar la pregunta  -->
-    <div *ngIf="currentQuestionIndex < questions.length" class="mb-6">
+    <!-- Cuestionario -->
+    @if (currentQuestionIndex < questions.length) {
+    <div class="mb-6">
       <h2
         class="text-xl font-semibold mb-4 text-gray-900 dark:text-white transition-all duration-300 ease-in-out"
       >
         {{ questions[currentQuestionIndex].question }}
       </h2>
-      <div
-        *ngFor="let option of questions[currentQuestionIndex].options"
-        class="mb-3"
+      @for (option of questions[currentQuestionIndex].options; track $index) {
+      <div class="mb-3"
       >
         <button
           [ngClass]="{
@@ -57,10 +57,14 @@
           {{ option }}
         </button>
       </div>
-    </div>
+      }
 
-    <!-- Botón para avanzar a la siguiente pregunta -->
-    <div *ngIf="isAnswerSelected" class="flex justify-end mt-6">
+    </div>
+    }
+
+    <!-- Botón de Continuar -->
+    @if(isAnswerSelected){
+    <div class="flex justify-end mt-6">
       <button
         class="text-xs px-3 py-3 backdrop-blur-sm bg-blue-500/80 dark:bg-blue-600/70 text-white rounded-full hover:bg-blue-600/90 dark:hover:bg-blue-700/80 transition-all duration-300 ease-in-out border border-blue-400/50 dark:border-blue-500/40 shadow-sm hover:shadow w-28"
         (click)="nextQuestion()"
@@ -71,9 +75,11 @@
         </span>
       </button>
     </div>
+    }
 
-    <!-- Mostrar el resultado final -->
-    <div *ngIf="currentQuestionIndex >= questions.length" class="mb-6">
+    <!-- Resultado del Quiz  -->
+    @if (currentQuestionIndex >= questions.length) {
+    <div class="mb-6">
       <div
         class="backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 p-6 rounded-xl border border-white/30 dark:border-gray-700/30 shadow-lg mb-6"
       >
@@ -109,25 +115,30 @@
         </span>
       </button>
     </div>
+    }
 
-    <!-- Mostrar el progreso (solo si el quiz no está completado) -->
-    <div *ngIf="currentQuestionIndex < questions.length" class="mt-6">
-      <div class="flex items-center justify-between">
-        <p
-          class="text-gray-600 dark:text-gray-300 transition-all duration-300 ease-in-out text-xs md:text-sm"
-        >
-          Pregunta {{ currentQuestionIndex + 1 }} de {{ questions.length }}
-        </p>
-        <!-- Barra de progreso -->
-        <div
-          class="w-1/2 bg-gray-300/50 dark:bg-gray-600/50 rounded-full h-2 backdrop-blur-sm"
-        >
+
+    <!-- Barra de Progreso -->
+    @if (currentQuestionIndex <questions.length) {
+    <div class="mt-6">
+        <div class="flex items-center justify-between">
+          <p
+            class="text-gray-600 dark:text-gray-300 transition-all duration-300 ease-in-out text-xs md:text-sm"
+          >
+            Pregunta {{ currentQuestionIndex + 1 }} de {{ questions.length }}
+          </p>
+          
           <div
-            class="bg-indigo-500/80 dark:bg-cyan-400/80 h-2 rounded-full transition-all duration-500 ease-in-out"
-            [style.width.%]="(currentQuestionIndex / questions.length) * 100"
-          ></div>
+            class="w-1/2 bg-gray-300/50 dark:bg-gray-600/50 rounded-full h-2 backdrop-blur-sm"
+          >
+            <div
+              class="bg-indigo-500/80 dark:bg-cyan-400/80 h-2 rounded-full transition-all duration-500 ease-in-out"
+              [style.width.%]="(currentQuestionIndex / questions.length) * 100"
+            ></div>
+          </div>
         </div>
-      </div>
     </div>
+    }
+    
   </div>
 </div>

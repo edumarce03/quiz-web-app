@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UserService } from '../../services/user.service';
+import { QuizService } from '../../services/quiz.service';
 
 @Component({
   selector: 'app-home',
@@ -16,25 +17,36 @@ import { UserService } from '../../services/user.service';
     }
   `,
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
   userName: string = '';
   selectedEmoji: string = '';
   emojis: string[] = ['😊', '🦙', '🙈', '🐱', '🤓', '👨‍💻'];
-  categories: any[] = [
-    { name: 'Ciencia', icon: 'fas fa-flask' },
-    { name: 'Historia', icon: 'fas fa-landmark' },
-    { name: 'Cine', icon: 'fas fa-film' },
-    { name: 'Matemáticas', icon: 'fas fa-calculator' },
-  ];
+  categories: any[] = [];
   editMode: boolean = false;
-  profileSaved: boolean = false; // Nueva variable para rastrear si el perfil se ha guardado
+  profileSaved: boolean = false;
 
-  // Propiedades para guardar los valores originales
+  private categoryIcons: { [key: string]: string } = {
+    Ciencia: 'fas fa-flask',
+    Historia: 'fas fa-landmark',
+    Cine: 'fas fa-film',
+    Matemáticas: 'fas fa-calculator',
+    Geografía: 'fas fa-globe-americas',
+    Tecnología: 'fas fa-laptop-code',
+  };
+
   private originalName: string = '';
   private originalEmoji: string = '';
 
-  constructor(private router: Router, private userService: UserService) {
+  constructor(
+    private router: Router,
+    private userService: UserService,
+    private quizService: QuizService
+  ) {
     this.loadUserData();
+  }
+
+  ngOnInit() {
+    this.loadCategories();
   }
 
   loadUserData() {
@@ -44,34 +56,41 @@ export class HomeComponent {
       this.selectedEmoji = userData.emoji;
       this.originalName = userData.name;
       this.originalEmoji = userData.emoji;
-      this.profileSaved = true; // Si ya hay datos, el perfil está guardado
+      this.profileSaved = true; //
     }
   }
 
-  // Método para seleccionar emoji con animación
+  loadCategories() {
+    const categoryNames = this.quizService.getCategories();
+
+    this.categories = categoryNames.map((name) => {
+      return {
+        name: name,
+        icon: this.categoryIcons[name] || 'fas fa-question', // Icono por defecto si no está en el mapeo
+      };
+    });
+  }
+
   selectEmoji(emoji: string) {
     this.selectedEmoji = emoji;
   }
 
-  // Método para guardar perfil
   saveProfile() {
     if (this.userName && this.selectedEmoji) {
       this.userService.setUser(this.userName, this.selectedEmoji);
       this.originalName = this.userName;
       this.originalEmoji = this.selectedEmoji;
       this.editMode = false;
-      this.profileSaved = true; // Marcar el perfil como guardado
+      this.profileSaved = true;
     }
   }
 
-  // Método para cancelar la edición
   cancelEdit() {
     this.userName = this.originalName;
     this.selectedEmoji = this.originalEmoji;
     this.editMode = false;
   }
 
-  // Método para seleccionar una categoría
   selectCategory(category: string) {
     if (this.userName && this.selectedEmoji && this.profileSaved) {
       this.router.navigate(['/quiz'], { state: { category } });

@@ -5,10 +5,8 @@
     class="backdrop-blur-md bg-white/70 dark:bg-gray-800/40 p-4 md:p-6 rounded-xl shadow-lg text-left max-w-sm md:max-w-md w-full transition-all duration-300 ease-in-out border border-white/20 dark:border-indigo-900/30"
   >
     <!-- Mensaje de bienvenida -->
-    <div
-      *ngIf="userName && selectedEmoji && !editMode && profileSaved"
-      class="mb-6 text-center"
-    >
+    @if (userName && selectedEmoji && !editMode && profileSaved) {
+    <div class="mb-6 text-center">
       <h1
         class="text-2xl md:text-4xl font-bold my-4 text-gray-900 dark:text-white transition-all duration-300 ease-in-out"
       >
@@ -20,9 +18,11 @@
         Elige una categoría para comenzar el quiz.
       </p>
     </div>
+    }
 
-    <!-- Formulario para ingresar nombre y emoji -->
-    <div *ngIf="!profileSaved || editMode">
+    <!-- Formulario: Información de Perfil -->
+    @if (!profileSaved || editMode) {
+    <div>
       <h1
         class="text-2xl md:text-4xl font-bold my-4 text-gray-900 dark:text-white transition-all duration-300 ease-in-out text-center"
       >
@@ -66,8 +66,8 @@
           >
         </div>
         <div class="flex flex-wrap gap-3">
+          @for (emoji of emojis; track $index) {
           <button
-            *ngFor="let emoji of emojis"
             [ngClass]="{
               'bg-indigo-200/80 dark:bg-red-500/30 shadow-inner':
                 selectedEmoji === emoji
@@ -77,20 +77,25 @@
           >
             {{ emoji }}
           </button>
+          }
         </div>
       </div>
 
       <!-- Botones de acción -->
       <div class="flex justify-between mt-2">
+        @if (editMode) {
         <button
-          *ngIf="editMode"
           (click)="cancelEdit()"
           class="text-xs md:text-sm px-4 py-2 bg-gray-200/80 dark:bg-gray-700/80 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300/90 dark:hover:bg-gray-600/90 shadow-sm hover:shadow transition-all duration-200 ease-in-out flex items-center justify-center"
         >
           <i class="fas fa-times mr-1.5"></i>
           Cancelar
         </button>
-        <div *ngIf="!editMode" class="flex-grow"></div>
+        }
+        <!---->
+        @if (!editMode) {
+        <div class="flex-grow"></div>
+        }
         <button
           (click)="saveProfile()"
           [disabled]="!userName || !selectedEmoji"
@@ -104,38 +109,45 @@
         </button>
       </div>
     </div>
+    }
 
     <!-- Categorías  -->
-    <div
-      *ngIf="userName && selectedEmoji && !editMode && profileSaved"
-      class="grid grid-cols-2 gap-4"
-    >
+    @if (userName && selectedEmoji && !editMode && profileSaved) {
+    <div class="grid grid-cols-2 gap-4">
+      @for (category of categories; track $index) {
       <div
-        *ngFor="let category of categories; let i = index"
         (click)="selectCategory(category.name)"
         [ngClass]="[
           'backdrop-blur-xl p-5 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:shadow-lg hover:-translate-y-1 active:translate-y-0 active:shadow-md transition-all duration-300 ease-in-out h-32 border',
-          i === 0
+          $index % 6 === 0
             ? 'bg-red-300/30 dark:bg-red-500/20 border-red-500/50 dark:border-red-700/40 hover:bg-red-500/40 dark:hover:bg-red-500/30'
             : '',
-          i === 1
+          $index % 6 === 1
             ? 'bg-blue-300/30 dark:bg-blue-500/20 border-blue-500/50 dark:border-blue-700/40 hover:bg-blue-500/40 dark:hover:bg-blue-500/30'
             : '',
-          i === 2
+          $index % 6 === 2
             ? 'bg-amber-300/30 dark:bg-amber-500/20 border-amber-500/50 dark:border-amber-700/40 hover:bg-amber-500/40 dark:hover:bg-amber-500/30'
             : '',
-          i === 3
+          $index % 6 === 3
             ? 'bg-green-300/30 dark:bg-green-500/20 border-green-500/50 dark:border-green-700/40 hover:bg-green-500/40 dark:hover:bg-green-500/30'
+            : '',
+          $index % 6 === 4
+            ? 'bg-purple-300/30 dark:bg-purple-500/20 border-purple-500/50 dark:border-purple-700/40 hover:bg-purple-500/40 dark:hover:bg-purple-500/30'
+            : '',
+          $index % 6 === 5
+            ? 'bg-cyan-300/30 dark:bg-cyan-500/20 border-cyan-500/50 dark:border-cyan-700/40 hover:bg-cyan-500/40 dark:hover:bg-cyan-500/30'
             : ''
         ]"
       >
         <i
           class="{{ category.icon }} text-3xl md:text-4xl mb-2"
           [ngClass]="[
-            i === 0 ? 'text-red-600 dark:text-red-400' : '',
-            i === 1 ? 'text-blue-600 dark:text-blue-400' : '',
-            i === 2 ? 'text-amber-600 dark:text-amber-400' : '',
-            i === 3 ? 'text-green-600 dark:text-green-400' : ''
+            $index % 6 === 0 ? 'text-red-600 dark:text-red-400' : '',
+            $index % 6 === 1 ? 'text-blue-600 dark:text-blue-400' : '',
+            $index % 6 === 2 ? 'text-amber-600 dark:text-amber-400' : '',
+            $index % 6 === 3 ? 'text-green-600 dark:text-green-400' : '',
+            $index % 6 === 4 ? 'text-purple-600 dark:text-purple-400' : '',
+            $index % 6 === 5 ? 'text-cyan-600 dark:text-cyan-400' : ''
           ]"
         ></i>
         <span
@@ -143,13 +155,13 @@
           >{{ category.name }}</span
         >
       </div>
+      }
     </div>
+    }
 
     <!-- Botones de acción en la parte inferior -->
-    <div
-      *ngIf="userName && selectedEmoji && !editMode && profileSaved"
-      class="flex justify-between mt-6"
-    >
+    @if (userName && selectedEmoji && !editMode && profileSaved) {
+    <div class="flex justify-between mt-6">
       <button
         (click)="editMode = true"
         class="px-3 py-1.5 bg-gray-100/80 dark:bg-gray-700/80 hover:bg-gray-200/90 dark:hover:bg-gray-600/90 rounded-lg backdrop-blur-sm transition-colors duration-300 flex items-center text-gray-700 dark:text-gray-300 text-xs md:text-sm shadow-sm"
@@ -158,5 +170,6 @@
         Editar perfil
       </button>
     </div>
+    }
   </div>
 </div>
