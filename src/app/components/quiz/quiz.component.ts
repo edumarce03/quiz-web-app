@@ -38,6 +38,11 @@ export class QuizComponent implements AfterViewChecked {
   correctAnswers: number = 0;
   incorrectAnswers: number = 0;
 
+  timePerQuestion: number = 15;
+  timeRemaining: number = 0;
+  timerInterval: any;
+  unansweredQuestions: number = 0;
+
   constructor(
     private userService: UserService,
     private router: Router,
@@ -63,11 +68,46 @@ export class QuizComponent implements AfterViewChecked {
     }
   }
 
+  ngOnInit() {
+    this.startTimer();
+  }
+
+  ngOnDestroy() {
+    this.clearTimer();
+  }
+
+  startTimer() {
+    this.timeRemaining = this.timePerQuestion;
+    this.clearTimer();
+
+    this.timerInterval = setInterval(() => {
+      this.timeRemaining--;
+
+      if (this.timeRemaining <= 0) {
+        if (!this.isAnswerSelected) {
+          this.handleTimeUp();
+        }
+      }
+    }, 1000);
+  }
+
+  handleTimeUp() {
+    this.clearTimer();
+    this.isAnswerSelected = true;
+    this.unansweredQuestions++;
+  }
+
+  clearTimer() {
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+      this.timerInterval = null;
+    }
+  }
+
   goBackToHome() {
     this.router.navigate(['/']);
   }
 
-  // Cargar preguntas según la categoría
   loadQuestions() {
     this.questions = this.quizService.getQuestionsByCategory(
       this.selectedCategory
@@ -80,6 +120,7 @@ export class QuizComponent implements AfterViewChecked {
 
   selectAnswer(answer: string) {
     if (!this.isAnswerSelected) {
+      this.clearTimer();
       this.selectedAnswer = answer;
       this.isAnswerCorrect =
         answer === this.questions[this.currentQuestionIndex].answer;
@@ -101,7 +142,10 @@ export class QuizComponent implements AfterViewChecked {
       this.isAnswerCorrect = null;
       this.isAnswerSelected = false;
 
-      if (this.currentQuestionIndex >= this.questions.length) {
+      if (this.currentQuestionIndex < this.questions.length) {
+        this.startTimer();
+      } else {
+        this.clearTimer();
         setTimeout(() => {
           this.initializeChart();
         }, 0);
@@ -111,11 +155,15 @@ export class QuizComponent implements AfterViewChecked {
 
   initializeChart() {
     if (this.chartElement && this.chartElement.nativeElement) {
-      const colors = ['#10B981', '#EF4444'];
+      const colors = ['#10B981', '#EF4444', '#48dbca'];
       const textColorChart = '#ffffff';
 
       const options = {
-        series: [this.correctAnswers, this.incorrectAnswers],
+        series: [
+          this.correctAnswers,
+          this.incorrectAnswers,
+          this.unansweredQuestions,
+        ],
         chart: {
           type: 'donut',
           height: 250,
@@ -128,7 +176,7 @@ export class QuizComponent implements AfterViewChecked {
             speed: 800,
           },
         },
-        labels: ['Correctas', 'Incorrectas'],
+        labels: ['Correctas', 'Incorrectas', 'Sin responder'],
         colors: colors,
         legend: {
           show: false,
@@ -185,7 +233,9 @@ export class QuizComponent implements AfterViewChecked {
     this.selectedAnswer = null;
     this.correctAnswers = 0;
     this.incorrectAnswers = 0;
+    this.unansweredQuestions = 0;
     this.isAnswerSelected = false;
+    this.startTimer();
 
     if (this.chart) {
       this.chart.destroy();

@@ -133,34 +133,41 @@ export const QUIZ_QUESTIONS = {
   ],
   Matemáticas: [
     {
-      question: '¿Cuál es el resultado de 2 + 2?',
-      options: ['3', '4', '5', '6'],
-      answer: '4',
+      question: '¿Cuál es el resultado de 12 × 12?',
+      options: ['144', '154', '164', '174'],
+      answer: '144',
     },
     {
-      question: '¿Cuál es la raíz cuadrada de 64?',
-      options: ['6', '8', '10', '12'],
-      answer: '8',
+      question: '¿Cuál es la derivada de x^2?',
+      options: ['x', '2x', 'x^2', '2'],
+      answer: '2x',
     },
     {
-      question: '¿Cuál es el valor de π (pi) redondeado a dos decimales?',
-      options: ['3.14', '3.16', '3.12', '3.18'],
-      answer: '3.14',
+      question: '¿Cuál es la integral de 2x?',
+      options: ['x^2 + C', '2x^2 + C', 'x^2', '2x'],
+      answer: 'x^2 + C',
     },
     {
-      question: '¿Qué número es primo?',
-      options: ['4', '6', '7', '8'],
-      answer: '7',
+      question:
+        '¿Cuál es el valor de e (número de Euler) redondeado a dos decimales?',
+      options: ['2.71', '3.14', '1.62', '2.30'],
+      answer: '2.71',
     },
     {
-      question: '¿Cuál es el resultado de 5 × 5?',
-      options: ['20', '25', '30', '35'],
-      answer: '25',
+      question: '¿Cuál es el resultado de 7! (factorial de 7)?',
+      options: ['5040', '720', '40320', '120'],
+      answer: '5040',
     },
     {
-      question: '¿Cuál es el área de un cuadrado con lado de 4 unidades?',
-      options: ['16', '12', '8', '4'],
-      answer: '16',
+      question:
+        '¿Cuál es el teorema que relaciona los catetos y la hipotenusa en un triángulo rectángulo?',
+      options: [
+        'Teorema de Pitágoras',
+        'Teorema de Tales',
+        'Teorema de Fermat',
+        'Teorema de Euclides',
+      ],
+      answer: 'Teorema de Pitágoras',
     },
   ],
   Geografía: [

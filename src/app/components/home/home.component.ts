@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UserService } from '../../services/user.service';
 import { QuizService } from '../../services/quiz.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-home',
@@ -24,6 +25,8 @@ export class HomeComponent implements OnInit {
   categories: any[] = [];
   editMode: boolean = false;
   profileSaved: boolean = false;
+  showNameError: boolean = false;
+  nameErrorMessage: string = '';
 
   private categoryIcons: { [key: string]: string } = {
     Ciencia: 'fas fa-flask',
@@ -40,13 +43,38 @@ export class HomeComponent implements OnInit {
   constructor(
     private router: Router,
     private userService: UserService,
-    private quizService: QuizService
+    private quizService: QuizService,
+    private toastr: ToastrService
   ) {
     this.loadUserData();
   }
 
   ngOnInit() {
     this.loadCategories();
+  }
+
+  checkName() {
+    if (this.userName !== undefined && this.userName.trim() === '') {
+      this.showNameError = true;
+      this.nameErrorMessage =
+        'El nombre no puede estar vacío o contener solo espacios';
+      return;
+    }
+
+    if (this.userName && this.userName.trim().includes(' ')) {
+      this.showNameError = true;
+      this.nameErrorMessage = 'Por favor ingresa solo un nombre (sin espacios)';
+      return;
+    }
+
+    this.showNameError = false;
+    this.nameErrorMessage = '';
+  }
+
+  get isValidName(): boolean {
+    if (!this.userName) return false;
+    const trimmedName = this.userName.trim();
+    return trimmedName !== '' && !trimmedName.includes(' ');
   }
 
   loadUserData() {
@@ -56,7 +84,7 @@ export class HomeComponent implements OnInit {
       this.selectedEmoji = userData.emoji;
       this.originalName = userData.name;
       this.originalEmoji = userData.emoji;
-      this.profileSaved = true; //
+      this.profileSaved = true;
     }
   }
 
@@ -66,7 +94,7 @@ export class HomeComponent implements OnInit {
     this.categories = categoryNames.map((name) => {
       return {
         name: name,
-        icon: this.categoryIcons[name] || 'fas fa-question', // Icono por defecto si no está en el mapeo
+        icon: this.categoryIcons[name] || 'fas fa-question',
       };
     });
   }
@@ -76,19 +104,28 @@ export class HomeComponent implements OnInit {
   }
 
   saveProfile() {
-    if (this.userName && this.selectedEmoji) {
-      this.userService.setUser(this.userName, this.selectedEmoji);
-      this.originalName = this.userName;
-      this.originalEmoji = this.selectedEmoji;
-      this.editMode = false;
-      this.profileSaved = true;
+    if (!this.isValidName) {
+      this.checkName();
+      this.toastr.error(this.nameErrorMessage, 'Error de validación');
+      return;
     }
+
+    this.userName = this.userName.trim();
+    this.userService.setUser(this.userName, this.selectedEmoji);
+    this.originalName = this.userName;
+    this.originalEmoji = this.selectedEmoji;
+    this.editMode = false;
+    this.profileSaved = true;
+    this.showNameError = false;
+
+    this.toastr.success('Perfil guardado correctamente', 'Éxito');
   }
 
   cancelEdit() {
     this.userName = this.originalName;
     this.selectedEmoji = this.originalEmoji;
     this.editMode = false;
+    this.toastr.info('Edición cancelada', 'Información');
   }
 
   selectCategory(category: string) {

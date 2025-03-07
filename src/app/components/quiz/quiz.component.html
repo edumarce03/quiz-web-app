@@ -2,10 +2,10 @@
   class="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-blue-100 via-indigo-50 to-purple-100 dark:from-gray-900 dark:via-blue-950 dark:to-purple-950 font-inter transition-all duration-500 ease-in-out"
 >
   <div
-    class="backdrop-blur-md bg-white/70 dark:bg-gray-800/40 p-4 md:p-6 rounded-xl shadow-lg text-left max-w-sm md:max-w-md w-full transition-all duration-300 ease-in-out border border-white/20 dark:border-indigo-900/30"
+    class="backdrop-blur-md bg-white/70 dark:bg-gray-800/40 p-6 rounded-xl shadow-lg text-left max-w-sm md:max-w-md w-full transition-all duration-300 ease-in-out border border-white/20 dark:border-indigo-900/30"
   >
-    <!-- Botón de Salir -->
-    <div class="flex justify-start mb-6">
+    <!-- Header: Botón de acción: Continuar -  Temporizador -->
+    <div class="flex justify-between items-center mb-6">
       <button
         class="text-xs px-3 py-2 backdrop-blur-sm bg-gray-500/80 text-white rounded-full hover:bg-gray-600/90 dark:bg-gray-600/80 dark:hover:bg-gray-700/90 transition-all duration-300 ease-in-out border border-gray-400/30 dark:border-gray-500/30 shadow-sm hover:shadow w-20"
         (click)="goBackToHome()"
@@ -13,34 +13,84 @@
         <i class="fas fa-arrow-left mr-2"></i>
         Salir
       </button>
+
+      @if (currentQuestionIndex < questions.length) {
+      <div class="flex items-center">
+        <div class="relative w-11 h-11 flex items-center justify-center">
+          <svg class="w-11 h-11 -rotate-90" viewBox="0 0 36 36">
+            <circle
+              cx="18"
+              cy="18"
+              r="16"
+              fill="none"
+              class="stroke-gray-200 dark:stroke-gray-700"
+              stroke-width="2.5"
+            ></circle>
+            <circle
+              cx="18"
+              cy="18"
+              r="16"
+              fill="none"
+              [ngClass]="{
+                'stroke-green-500 dark:stroke-green-400': timeRemaining > 10,
+                'stroke-amber-500 dark:stroke-amber-400':
+                  timeRemaining <= 10 && timeRemaining > 5,
+                'stroke-red-500 dark:stroke-red-400': timeRemaining <= 5
+              }"
+              stroke-width="3"
+              stroke-dasharray="100.5"
+              [attr.stroke-dashoffset]="
+                100 - (timeRemaining / timePerQuestion) * 100
+              "
+              stroke-linecap="round"
+              class="transition-all duration-1000 ease-linear"
+            ></circle>
+          </svg>
+          <span
+            class="absolute text-sm font-bold transition-colors duration-300"
+            [ngClass]="{
+              'text-green-600 dark:text-green-400': timeRemaining > 10,
+              'text-amber-600 dark:text-amber-400':
+                timeRemaining <= 10 && timeRemaining > 5,
+              'text-red-600 dark:text-red-400': timeRemaining <= 5
+            }"
+            >{{ timeRemaining }}</span
+          >
+        </div>
+        <span class="ml-1 text-xs text-gray-600 dark:text-gray-400">seg</span>
+      </div>
+      }
     </div>
 
     <!-- Bienvenida -->
-    <div class="mb-6">
+    <div
+      class="mt-3 mb-4 border-b border-gray-400/30 dark:border-gray-700/30 pb-4"
+    >
       <h1
-        class="text-2xl font-bold text-gray-900 dark:text-white transition-all duration-300 ease-in-out flex items-center"
+        class="italic text-sm font-medium text-gray-900 dark:text-white transition-all duration-300 ease-in-out flex items-center"
       >
-        {{ userName }}
-        <span class="ml-2 text-xl">{{ userEmoji }}</span>
+        Categoría:
+        <span
+          class="ml-1 font-light text-gray-600 dark:text-gray-300 transition-all duration-300 ease-in-out"
+        >
+          {{ selectedCategory }}
+        </span>
       </h1>
-      <p
-        class="text-gray-600 dark:text-gray-300 transition-all duration-300 ease-in-out"
-      >
-        Categoría: {{ selectedCategory }}
-      </p>
     </div>
 
     <!-- Cuestionario -->
     @if (currentQuestionIndex < questions.length) {
     <div class="mb-6">
+      <!-- Pregunta -->
       <h2
-        class="text-xl font-semibold mb-4 text-gray-900 dark:text-white transition-all duration-300 ease-in-out"
+        class="text-xl font-semibold text-gray-900 dark:text-white transition-all duration-300 ease-in-out mb-4 text-justify"
       >
         {{ questions[currentQuestionIndex].question }}
       </h2>
+
+      <!-- Opciones de respuesta -->
       @for (option of questions[currentQuestionIndex].options; track $index) {
-      <div class="mb-3"
-      >
+      <div class="mb-3">
         <button
           [ngClass]="{
             'bg-green-500/90 dark:bg-green-600/80 border-green-400/50 dark:border-green-500/40':
@@ -59,12 +109,61 @@
       </div>
       }
 
+      <!-- Estado de Respuesta -->
+      @if(isAnswerSelected) {
+      <div class="mt-5 transform transition-all duration-300 ease-out">
+        <!-- Respuesta Correcta  -->
+        <div
+          class="bg-white/80 dark:bg-gray-800/80 rounded-lg border border-green-200 dark:border-green-900/30 shadow-md overflow-hidden"
+        >
+          <div
+            class="bg-green-500/20 dark:bg-green-800/20 px-4 py-2 flex items-center"
+          >
+            <i
+              class="fas fa-check-circle text-green-600 dark:text-green-400 mr-2"
+            ></i>
+            <span class="font-medium text-green-800 dark:text-green-300"
+              >Respuesta Correcta</span
+            >
+          </div>
+
+          <div class="px-4 py-3">
+            <p class="text-gray-800 dark:text-gray-200 text-sm">
+              {{ questions[currentQuestionIndex].answer }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Mensaje de Tiempo Agotado -->
+        @if(timeRemaining === 0 && !selectedAnswer) {
+        <div
+          class="mt-3 bg-white/80 dark:bg-gray-800/80 rounded-lg border border-amber-200 dark:border-amber-900/30 shadow-md overflow-hidden animate-pulse"
+        >
+          <div
+            class="bg-amber-500/20 dark:bg-amber-800/20 px-4 py-2 flex items-center"
+          >
+            <i
+              class="fas fa-exclamation-circle text-amber-600 dark:text-amber-400 mr-2"
+            ></i>
+            <span class="font-medium text-amber-800 dark:text-amber-300"
+              >Tiempo Agotado</span
+            >
+          </div>
+          <div class="px-4 py-2">
+            <p class="text-gray-700 dark:text-gray-300 text-xs">
+              No se seleccionó ninguna respuesta a tiempo.
+            </p>
+          </div>
+        </div>
+        }
+      </div>
+      }
     </div>
     }
 
-    <!-- Botón de Continuar -->
+    <!-- Botones de acción: Continuar -->
     @if(isAnswerSelected){
-    <div class="flex justify-end mt-6">
+    <div class="flex justify-end mt-4 mb-4">
       <button
         class="text-xs px-3 py-3 backdrop-blur-sm bg-blue-500/80 dark:bg-blue-600/70 text-white rounded-full hover:bg-blue-600/90 dark:hover:bg-blue-700/80 transition-all duration-300 ease-in-out border border-blue-400/50 dark:border-blue-500/40 shadow-sm hover:shadow w-28"
         (click)="nextQuestion()"
@@ -77,7 +176,7 @@
     </div>
     }
 
-    <!-- Resultado del Quiz  -->
+    <!-- Resultado del Quiz -->
     @if (currentQuestionIndex >= questions.length) {
     <div class="mb-6">
       <div
@@ -117,28 +216,26 @@
     </div>
     }
 
+    <!-- Barra de Progreso del Quiz -->
+    @if (currentQuestionIndex < questions.length) {
+    <div class="mt-2 pt-3 border-t border-gray-400/30 dark:border-gray-700/30">
+      <div class="flex items-center justify-between">
+        <p
+          class="text-gray-600 dark:text-gray-300 transition-all duration-300 ease-in-out text-xs md:text-sm"
+        >
+          Progreso: {{ currentQuestionIndex + 1 }} de {{ questions.length }}
+        </p>
 
-    <!-- Barra de Progreso -->
-    @if (currentQuestionIndex <questions.length) {
-    <div class="mt-6">
-        <div class="flex items-center justify-between">
-          <p
-            class="text-gray-600 dark:text-gray-300 transition-all duration-300 ease-in-out text-xs md:text-sm"
-          >
-            Pregunta {{ currentQuestionIndex + 1 }} de {{ questions.length }}
-          </p>
-          
+        <div
+          class="w-1/2 bg-gray-300/50 dark:bg-gray-600/50 rounded-full h-2 backdrop-blur-sm"
+        >
           <div
-            class="w-1/2 bg-gray-300/50 dark:bg-gray-600/50 rounded-full h-2 backdrop-blur-sm"
-          >
-            <div
-              class="bg-indigo-500/80 dark:bg-cyan-400/80 h-2 rounded-full transition-all duration-500 ease-in-out"
-              [style.width.%]="(currentQuestionIndex / questions.length) * 100"
-            ></div>
-          </div>
+            class="bg-purple-500/80 dark:bg-purple-400/80 h-2 rounded-full transition-all duration-500 ease-in-out"
+            [style.width.%]="(currentQuestionIndex / questions.length) * 100"
+          ></div>
         </div>
+      </div>
     </div>
     }
-    
   </div>
 </div>
