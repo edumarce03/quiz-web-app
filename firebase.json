@@ -1,0 +1,13 @@
+{
+  "hosting": {
+    "site": "quiz-edu-projects",
+    "public": "dist/quiz-web-app/browser",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
